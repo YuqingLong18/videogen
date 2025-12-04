@@ -1,5 +1,5 @@
 // Configuration
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:${window.location.port || 3000}/api`;
 const POLL_INTERVAL = 3000; // Poll every 3 seconds
 const MAX_POLL_ATTEMPTS = 200; // Max 10 minutes (200 * 3s)
 
@@ -107,11 +107,10 @@ async function handleText2Video(e) {
 
     try {
         const requestData = {
-            model: elements.textModel.value,
+            model_name: elements.textModel.value,
             prompt: elements.textPrompt.value.trim(),
             duration: elements.textDuration.value,
             aspect_ratio: elements.textAspectRatio.value,
-            cfg_scale: 0.5,
             mode: "std"
         };
 
@@ -127,7 +126,7 @@ async function handleText2Video(e) {
 
         if (!response.ok) {
             const error = await response.json();
-            throw new Error(error.message || 'Failed to generate video');
+            throw new Error(error.error || error.message || 'Failed to generate video');
         }
 
         const result = await response.json();
@@ -157,11 +156,10 @@ async function handleImage2Video(e) {
         const startFrameBase64 = await fileToBase64(startFrameFile);
 
         const requestData = {
-            model: elements.imageModel.value,
+            model_name: elements.imageModel.value,
             image: startFrameBase64,
             prompt: elements.imagePrompt.value.trim() || '',
             duration: elements.imageDuration.value,
-            cfg_scale: 0.5,
             mode: "std"
         };
 

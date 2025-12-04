@@ -8,7 +8,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const KLING_ACCESS_KEY = process.env.KLING_ACCESS_KEY;
 const KLING_SECRET_KEY = process.env.KLING_SECRET_KEY;
-const KLING_API_BASE = 'https://api.klingai.com';
+const KLING_API_BASE = 'https://api-beijing.klingai.com';
 
 // Generate JWT token for Kling API authentication
 function generateKlingToken() {

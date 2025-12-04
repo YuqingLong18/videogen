@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kling AI Video Generator</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <!-- Left Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1 class="logo">
+                    <span class="logo-icon">🎬</span>
+                    Kling AI
+                </h1>
+                <p class="subtitle">Video Generator</p>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="tab-navigation">
+                <button class="tab-btn active" data-tab="text2video">
+                    <span class="tab-icon">✍️</span>
+                    Text to Video
+                </button>
+                <button class="tab-btn" data-tab="image2video">
+                    <span class="tab-icon">🖼️</span>
+                    Image to Video
+                </button>
+            </div>
+
+            <!-- Text to Video Tab -->
+            <div class="tab-content active" id="text2video-tab">
+                <form id="text2video-form">
+                    <div class="form-group">
+                        <label for="text-prompt">Prompt</label>
+                        <textarea id="text-prompt" placeholder="Describe the video you want to generate..." rows="4"
+                            required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="text-duration">Duration</label>
+                        <select id="text-duration">
+                            <option value="5">5 seconds</option>
+                            <option value="10">10 seconds</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="text-aspect-ratio">Aspect Ratio</label>
+                        <select id="text-aspect-ratio">
+                            <option value="16:9">16:9 (Landscape)</option>
+                            <option value="9:16">9:16 (Portrait)</option>
+                            <option value="1:1">1:1 (Square)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="text-model">Model</label>
+                        <select id="text-model">
+                            <option value="kling-v1">Kling v1</option>
+                            <option value="kling-v1-5">Kling v1.5</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn-primary" id="text-generate-btn">
+                        <span class="btn-text">Generate Video</span>
+                        <span class="btn-loader"></span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Image to Video Tab -->
+            <div class="tab-content" id="image2video-tab">
+                <form id="image2video-form">
+                    <div class="form-group">
+                        <label for="start-frame">Starting Frame</label>
+                        <div class="file-upload">
+                            <input type="file" id="start-frame" accept="image/*" required />
+                            <div class="file-upload-label">
+                                <span class="upload-icon">📁</span>
+                                <span class="upload-text">Choose starting frame</span>
+                            </div>
+                            <div class="image-preview" id="start-frame-preview"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="end-frame">Ending Frame (Optional)</label>
+                        <div class="file-upload">
+                            <input type="file" id="end-frame" accept="image/*" />
+                            <div class="file-upload-label">
+                                <span class="upload-icon">📁</span>
+                                <span class="upload-text">Choose ending frame</span>
+                            </div>
+                            <div class="image-preview" id="end-frame-preview"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="image-prompt">Prompt</label>
+                        <textarea id="image-prompt" placeholder="Describe the video motion..." rows="3"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="image-duration">Duration</label>
+                        <select id="image-duration">
+                            <option value="5">5 seconds</option>
+                            <option value="10">10 seconds</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="image-model">Model</label>
+                        <select id="image-model">
+                            <option value="kling-v1">Kling v1</option>
+                            <option value="kling-v1-5">Kling v1.5</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn-primary" id="image-generate-btn">
+                        <span class="btn-text">Generate Video</span>
+                        <span class="btn-loader"></span>
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <!-- Main Video Canvas -->
+        <main class="video-canvas">
+            <div class="video-container">
+                <div class="placeholder" id="video-placeholder">
+                    <div class="placeholder-content">
+                        <div class="placeholder-icon">🎥</div>
+                        <h2>Ready to Create</h2>
+                        <p>Generate your first video using the controls on the left</p>
+                    </div>
+                </div>
+
+                <video id="video-player" class="video-player" controls></video>
+
+                <div class="loading-overlay" id="loading-overlay">
+                    <div class="loading-content">
+                        <div class="spinner"></div>
+                        <p class="loading-text">Generating your video...</p>
+                        <p class="loading-subtext" id="loading-status">Initializing...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="video-controls" id="video-controls">
+                <button class="btn-download" id="download-btn">
+                    <span>⬇️</span>
+                    Download Video
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

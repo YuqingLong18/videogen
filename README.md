@@ -15,22 +15,22 @@ A modern web interface for generating videos using Kling AI's text-to-video and 
 - Node.js (v14 or higher)
 - Kling AI API key ([Get one here](https://app.klingai.com))
 
-## Installation
+## Setup
 
-1. Clone or download this repository
-
+1. Clone the repository
 2. Install dependencies:
-```bash
-npm install
-```
-
-3. Configure your API key:
-   - Open the `.env` file
-   - Replace `your_api_key_here` with your actual Kling AI API key:
+   ```bash
+   npm install
    ```
-   KLING_API_KEY=your_actual_api_key_here
+
+3. Create a `.env` file in the root directory with your Kling AI API credentials:
+   ```env
+   KLING_ACCESS_KEY=your_access_key_here
+   KLING_SECRET_KEY=your_secret_key_here
    PORT=3000
    ```
+   
+   **Note**: The Kling AI API uses JWT authentication requiring both an Access Key and Secret Key. See [API_AUTH.md](API_AUTH.md) for details.
 
 ## Usage
 

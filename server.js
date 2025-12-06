@@ -47,6 +47,7 @@ app.post('/api/text2video', async (req, res) => {
             });
         }
 
+        console.log('📤 [Text2Video] Submitting request:', JSON.stringify(req.body, null, 2));
         const token = generateKlingToken();
 
         const response = await fetch(`${KLING_API_BASE}/v1/videos/text2video`, {
@@ -59,14 +60,17 @@ app.post('/api/text2video', async (req, res) => {
         });
 
         const data = await response.json();
+        console.log('📥 [Text2Video] API Response:', JSON.stringify(data, null, 2));
 
         if (!response.ok) {
+            console.error('❌ [Text2Video] API Error:', response.status, data);
             return res.status(response.status).json(data);
         }
 
+        console.log('✅ [Text2Video] Task submitted successfully. Task ID:', data.data?.task_id);
         res.json(data);
     } catch (error) {
-        console.error('Text2Video error:', error);
+        console.error('❌ [Text2Video] Error:', error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -81,6 +85,7 @@ app.get('/api/text2video/:taskId', async (req, res) => {
         }
 
         const token = generateKlingToken();
+        console.log(`🔍 [Text2Video] Checking status for task: ${req.params.taskId}`);
 
         const response = await fetch(
             `${KLING_API_BASE}/v1/videos/text2video/${req.params.taskId}`,
@@ -93,13 +98,23 @@ app.get('/api/text2video/:taskId', async (req, res) => {
 
         const data = await response.json();
 
+        // Log the FULL response to see the structure
+        console.log('📥 [Text2Video] Full status response:', JSON.stringify(data, null, 2));
+
+        // FIX: task_status is at data.task_status, not data.task_result.task_status
+        const status = data.data?.task_status;
+        const statusMsg = data.data?.task_status_msg;
+
+        console.log(`📊 [Text2Video] Status: ${status} - ${statusMsg || 'No message'}`);
+
         if (!response.ok) {
+            console.error('❌ [Text2Video] Status check failed:', response.status, data);
             return res.status(response.status).json(data);
         }
 
         res.json(data);
     } catch (error) {
-        console.error('Text2Video status error:', error);
+        console.error('❌ [Text2Video] Status error:', error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -113,6 +128,11 @@ app.post('/api/image2video', async (req, res) => {
             });
         }
 
+        const bodyToLog = { ...req.body };
+        if (bodyToLog.image) bodyToLog.image = '[BASE64_DATA]';
+        if (bodyToLog.image_tail) bodyToLog.image_tail = '[BASE66_DATA]';
+        console.log('📤 [Image2Video] Submitting request:', JSON.stringify(bodyToLog, null, 2));
+
         const token = generateKlingToken();
 
         const response = await fetch(`${KLING_API_BASE}/v1/videos/image2video`, {
@@ -125,14 +145,17 @@ app.post('/api/image2video', async (req, res) => {
         });
 
         const data = await response.json();
+        console.log('📥 [Image2Video] API Response:', JSON.stringify(data, null, 2));
 
         if (!response.ok) {
+            console.error('❌ [Image2Video] API Error:', response.status, data);
             return res.status(response.status).json(data);
         }
 
+        console.log('✅ [Image2Video] Task submitted successfully. Task ID:', data.data?.task_id);
         res.json(data);
     } catch (error) {
-        console.error('Image2Video error:', error);
+        console.error('❌ [Image2Video] Error:', error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -147,6 +170,7 @@ app.get('/api/image2video/:taskId', async (req, res) => {
         }
 
         const token = generateKlingToken();
+        console.log(`🔍 [Image2Video] Checking status for task: ${req.params.taskId}`);
 
         const response = await fetch(
             `${KLING_API_BASE}/v1/videos/image2video/${req.params.taskId}`,
@@ -159,13 +183,23 @@ app.get('/api/image2video/:taskId', async (req, res) => {
 
         const data = await response.json();
 
+        // Log the FULL response to see the structure
+        console.log('📥 [Image2Video] Full status response:', JSON.stringify(data, null, 2));
+
+        // FIX: task_status is at data.task_status, not data.task_result.task_status
+        const status = data.data?.task_status;
+        const statusMsg = data.data?.task_status_msg;
+
+        console.log(`📊 [Image2Video] Status: ${status} - ${statusMsg || 'No message'}`);
+
         if (!response.ok) {
+            console.error('❌ [Image2Video] Status check failed:', response.status, data);
             return res.status(response.status).json(data);
         }
 
         res.json(data);
     } catch (error) {
-        console.error('Image2Video status error:', error);
+        console.error('❌ [Image2Video] Status error:', error);
         res.status(500).json({ error: error.message });
     }
 });

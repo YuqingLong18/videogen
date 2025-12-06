@@ -83,11 +83,14 @@
                         <label for="start-frame">Starting Frame</label>
                         <div class="file-upload">
                             <input type="file" id="start-frame" accept="image/*" required />
+                            <div class="image-preview" id="start-frame-preview">
+                                <button type="button" class="remove-image-btn" id="remove-start-frame"
+                                    title="Remove image">✕</button>
+                            </div>
                             <div class="file-upload-label">
                                 <span class="upload-icon">📁</span>
                                 <span class="upload-text">Choose starting frame</span>
                             </div>
-                            <div class="image-preview" id="start-frame-preview"></div>
                         </div>
                     </div>
 
@@ -95,11 +98,14 @@
                         <label for="end-frame">Ending Frame (Optional)</label>
                         <div class="file-upload">
                             <input type="file" id="end-frame" accept="image/*" />
+                            <div class="image-preview" id="end-frame-preview">
+                                <button type="button" class="remove-image-btn" id="remove-end-frame"
+                                    title="Remove image">✕</button>
+                            </div>
                             <div class="file-upload-label">
                                 <span class="upload-icon">📁</span>
                                 <span class="upload-text">Choose ending frame</span>
                             </div>
-                            <div class="image-preview" id="end-frame-preview"></div>
                         </div>
                     </div>
 

@@ -1,7 +1,7 @@
 // Configuration
 const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:${window.location.port || 3000}/api`;
 const POLL_INTERVAL = 3000; // Poll every 3 seconds
-const MAX_POLL_ATTEMPTS = 200; // Max 10 minutes (200 * 3s)
+const MAX_POLL_ATTEMPTS = 400; // Max 20 minutes (400 * 3s) - Kling can take a while!
 
 // State
 let currentTaskId = null;
@@ -61,6 +61,10 @@ function setupEventListeners() {
     elements.startFrameInput.addEventListener('change', (e) => handleImageUpload(e, elements.startFramePreview));
     elements.endFrameInput.addEventListener('change', (e) => handleImageUpload(e, elements.endFramePreview));
 
+    // Remove image buttons
+    document.getElementById('remove-start-frame').addEventListener('click', () => removeImage('start-frame'));
+    document.getElementById('remove-end-frame').addEventListener('click', () => removeImage('end-frame'));
+
     // Download
     elements.downloadBtn.addEventListener('click', downloadVideo);
 }
@@ -85,17 +89,45 @@ function handleImageUpload(event, previewElement) {
 
     const reader = new FileReader();
     reader.onload = (e) => {
+        // Find the remove button and preserve it
+        const removeBtn = previewElement.querySelector('.remove-image-btn');
         previewElement.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+        if (removeBtn) {
+            previewElement.appendChild(removeBtn);
+        }
         previewElement.classList.add('active');
     };
     reader.readAsDataURL(file);
+}
+
+// Remove Image
+function removeImage(inputId) {
+    const input = document.getElementById(inputId);
+    const previewId = `${inputId}-preview`;
+    const preview = document.getElementById(previewId);
+
+    // Clear the file input
+    input.value = '';
+
+    // Clear the preview and hide it
+    const removeBtn = preview.querySelector('.remove-image-btn');
+    preview.innerHTML = '';
+    if (removeBtn) {
+        preview.appendChild(removeBtn);
+    }
+    preview.classList.remove('active');
 }
 
 // Convert image file to base64
 function fileToBase64(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
+        reader.onload = () => {
+            // Strip the data URL prefix (e.g., "data:image/png;base64,")
+            // Kling API expects only the base64 data, not the full data URL
+            const base64Data = reader.result.split(',')[1];
+            resolve(base64Data);
+        };
         reader.onerror = reject;
         reader.readAsDataURL(file);
     });
@@ -202,6 +234,11 @@ async function handleImage2Video(e) {
 // Poll Task Status
 async function pollTaskStatus(type) {
     try {
+        pollAttempts++;
+        const elapsedMinutes = ((pollAttempts * POLL_INTERVAL) / 60000).toFixed(1);
+
+        console.log(`🔄 [Poll #${pollAttempts}] Checking status (${elapsedMinutes} min elapsed)...`);
+
         const response = await fetch(`${API_BASE_URL}/${type}/${currentTaskId}`, {
             method: 'GET'
         });
@@ -211,29 +248,45 @@ async function pollTaskStatus(type) {
         }
 
         const result = await response.json();
-        const task = result.data.task_result;
 
-        updateLoadingStatus(task.task_status, task.task_status_msg);
+        // Log the FULL response for debugging
+        console.log(`📥 [Poll #${pollAttempts}] Full API response:`, JSON.stringify(result, null, 2));
 
-        if (task.task_status === 'succeed') {
+        // FIX: task_status is at data.task_status, not data.task_result.task_status
+        const taskStatus = result.data.task_status;
+        const taskStatusMsg = result.data.task_status_msg;
+        const taskResult = result.data.task_result;
+
+        console.log(`📊 [Poll #${pollAttempts}] Status: "${taskStatus}" | Message: "${taskStatusMsg || 'None'}"`);
+
+        updateLoadingStatus(taskStatus, taskStatusMsg);
+
+        if (taskStatus === 'succeed') {
             // Video generation complete
-            const videoUrl = task.task_result.videos[0].url;
+            console.log('✅ Video generation complete!');
+            console.log('📦 Task result:', JSON.stringify(taskResult, null, 2));
+
+            // The video URL is in task_result.videos[0].url
+            const videoUrl = taskResult.videos[0].url;
+            console.log('🎬 Video URL:', videoUrl);
             displayVideo(videoUrl);
             setLoading(false);
             showNotification('Video generated successfully!', 'success');
-        } else if (task.task_status === 'failed') {
-            throw new Error(task.task_status_msg || 'Video generation failed');
+        } else if (taskStatus === 'failed') {
+            console.error('❌ Video generation failed:', taskStatusMsg);
+            throw new Error(taskStatusMsg || 'Video generation failed');
         } else {
             // Still processing, continue polling
-            pollAttempts++;
             if (pollAttempts >= MAX_POLL_ATTEMPTS) {
+                console.error(`⏱️ Timeout after ${pollAttempts} attempts (${elapsedMinutes} minutes)`);
                 throw new Error('Video generation timed out');
             }
+            console.log(`⏳ Still processing... will check again in ${POLL_INTERVAL / 1000}s`);
             setTimeout(() => pollTaskStatus(type), POLL_INTERVAL);
         }
 
     } catch (error) {
-        console.error('Polling error:', error);
+        console.error('❌ Polling error:', error);
         showNotification(error.message, 'error');
         setLoading(false);
     }
@@ -248,7 +301,15 @@ function updateLoadingStatus(status, message) {
         'failed': 'Failed'
     };
 
-    elements.loadingStatus.textContent = statusMap[status] || message || 'Processing...';
+    let statusText = statusMap[status] || message || 'Processing...';
+
+    // Add poll count and elapsed time if we're polling
+    if (pollAttempts > 0 && status !== 'succeed' && status !== 'failed') {
+        const elapsedMinutes = ((pollAttempts * POLL_INTERVAL) / 60000).toFixed(1);
+        statusText += ` (Poll #${pollAttempts}, ${elapsedMinutes} min)`;
+    }
+
+    elements.loadingStatus.textContent = statusText;
 }
 
 // Display Video

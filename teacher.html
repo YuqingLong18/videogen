@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard - Nexus Video</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: var(--bg-main);
+        }
+
+        /* Login Section */
+        #login-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f5f3ff 0%, #ffffff 100%);
+        }
+
+        .login-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid var(--border);
+        }
+
+        /* Dashboard Section */
+        #dashboard-section {
+            display: none;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .classroom-info {
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .code-display {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: 2px;
+            font-family: monospace;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+        }
+
+        .student-list {
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            height: fit-content;
+        }
+
+        .student-item {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .student-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 1rem;
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .activity-feed {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .submission-card {
+            background: white;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .submission-media {
+            aspect-ratio: 16/9;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .submission-media video,
+        .submission-media img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .submission-info {
+            padding: 1rem;
+        }
+
+        .submission-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .submission-prompt {
+            font-size: 0.875rem;
+            color: var(--text-primary);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Login Section -->
+    <div id="login-section">
+        <div class="login-card">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <h1 style="color: var(--primary-dark); margin-bottom: 0.5rem;">Teacher Dashboard</h1>
+                <p style="color: var(--text-secondary);">Sign in with Nexus credentials</p>
+            </div>
+
+            <form id="teacher-login-form">
+                <div class="error-msg" id="login-error"
+                    style="color: red; display: none; text-align: center; margin-bottom: 1rem;"></div>
+
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="username" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="password" required>
+                </div>
+
+                <button type="submit" class="btn-primary" id="login-btn">
+                    <span class="btn-text">Sign In</span>
+                    <span class="btn-loader"></span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dashboard Section -->
+    <div id="dashboard-section">
+        <div class="dashboard-header">
+            <h1>Teacher Dashboard</h1>
+            <button class="btn-danger" id="end-session-btn">End Session</button>
+        </div>
+
+        <div class="classroom-info">
+            <div>
+                <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">CLASSROOM CODE
+                </div>
+                <div class="code-display" id="classroom-code-display">--------</div>
+            </div>
+            <div style="text-align: right;">
+                <div style="font-size: 0.875rem; color: var(--text-secondary);">Active Students</div>
+                <div style="font-size: 1.5rem; font-weight: 600;" id="student-count">0</div>
+            </div>
+        </div>
+
+        <div class="grid-layout">
+            <aside>
+                <div class="student-list">
+                    <h3 style="margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);">
+                        Students</h3>
+                    <div id="students-container">
+                        <!-- Student items here -->
+                        <p style="color: var(--text-muted); font-size: 0.875rem;">No students joined yet.</p>
+                    </div>
+                </div>
+            </aside>
+
+            <main>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3>Live Activity</h3>
+                    <button class="btn-secondary" id="refresh-btn"
+                        style="width: auto; padding: 0.5rem 1rem;">Refresh</button>
+                </div>
+                <div class="activity-feed" id="activity-feed">
+                    <!-- Submissions here -->
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="teacher.js"></script>
+</body>
+
+</html>

@@ -1,5 +1,5 @@
 // Configuration
-const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:${window.location.port || 3000}/api`;
+const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:${window.location.port || 3001}/api`;
 const POLL_INTERVAL = 3000; // Poll every 3 seconds
 const MAX_POLL_ATTEMPTS = 400; // Max 20 minutes (400 * 3s) - Kling can take a while!
 
@@ -38,13 +38,46 @@ const elements = {
     loadingOverlay: document.getElementById('loading-overlay'),
     loadingStatus: document.getElementById('loading-status'),
     videoControls: document.getElementById('video-controls'),
-    downloadBtn: document.getElementById('download-btn')
+    downloadBtn: document.getElementById('download-btn'),
+
+    // User Info
+    userInfo: document.getElementById('user-info'),
+    userName: document.getElementById('user-name'),
+    classroomCodeDisplay: document.getElementById('classroom-code-display'),
+    logoutBtn: document.getElementById('logout-btn')
 };
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+    checkSession();
     setupEventListeners();
 });
+
+// Check Session
+async function checkSession() {
+    try {
+        const res = await fetch(`${API_BASE_URL}/session`);
+        if (!res.ok) {
+            window.location.href = '/login.html';
+            return;
+        }
+
+        const data = await res.json();
+        if (!data.user || data.user.role !== 'student') {
+            window.location.href = '/login.html';
+            return;
+        }
+
+        // Update UI
+        elements.userInfo.style.display = 'block';
+        elements.userName.textContent = data.user.username;
+        elements.classroomCodeDisplay.textContent = `Classroom: ${data.session.classroomCode}`;
+
+    } catch (error) {
+        console.error('Session check failed', error);
+        window.location.href = '/login.html';
+    }
+}
 
 // Setup Event Listeners
 function setupEventListeners() {
@@ -67,6 +100,17 @@ function setupEventListeners() {
 
     // Download
     elements.downloadBtn.addEventListener('click', downloadVideo);
+
+    // Logout
+    if (elements.logoutBtn) {
+        elements.logoutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.cookie.split(";").forEach(function (c) {
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+            });
+            window.location.href = '/login.html';
+        });
+    }
 }
 
 // Switch Tab
@@ -156,6 +200,11 @@ async function handleText2Video(e) {
             body: JSON.stringify(requestData)
         });
 
+        if (response.status === 403) {
+            window.location.href = '/login.html';
+            return;
+        }
+
         if (!response.ok) {
             const error = await response.json();
             throw new Error(error.error || error.message || 'Failed to generate video');
@@ -212,6 +261,11 @@ async function handleImage2Video(e) {
             body: JSON.stringify(requestData)
         });
 
+        if (response.status === 403) {
+            window.location.href = '/login.html';
+            return;
+        }
+
         if (!response.ok) {
             const error = await response.json();
             throw new Error(error.message || 'Failed to generate video');
@@ -242,6 +296,11 @@ async function pollTaskStatus(type) {
         const response = await fetch(`${API_BASE_URL}/${type}/${currentTaskId}`, {
             method: 'GET'
         });
+
+        if (response.status === 403) {
+            window.location.href = '/login.html';
+            return;
+        }
 
         if (!response.ok) {
             throw new Error('Failed to check task status');

@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Teacher {
+  id           String    @id @default(cuid())
+  username     String    @unique
+  displayName  String?
+  createdAt    DateTime  @default(now())
+  sessions     Session[]
+}
+
+model Session {
+  id              String             @id @default(cuid())
+  classroomCode   String             @unique
+  isActive        Boolean            @default(true)
+  createdAt       DateTime           @default(now())
+  endedAt         DateTime?
+  teacher         Teacher            @relation(fields: [teacherId], references: [id])
+  teacherId       String
+  students        Student[]
+  videoSubmissions VideoSubmission[]
+
+  @@index([teacherId])
+}
+
+model Student {
+  id           String             @id @default(cuid())
+  username     String
+  status       String             @default("ACTIVE") // ACTIVE, REMOVED
+  createdAt    DateTime           @default(now())
+  session      Session            @relation(fields: [sessionId], references: [id])
+  sessionId    String
+  submissions  VideoSubmission[]
+
+  @@unique([sessionId, username])
+  @@index([sessionId])
+}
+
+model VideoSubmission {
+  id                 String    @id @default(cuid())
+  session            Session   @relation(fields: [sessionId], references: [id])
+  sessionId          String
+  student            Student?  @relation(fields: [studentId], references: [id])
+  studentId          String?
+  
+  prompt             String
+  taskId             String    @unique
+  status             String    @default("PENDING") // PENDING, SUCCESS, ERROR
+  videoUrl           String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([sessionId])
+  @@index([studentId])
+}

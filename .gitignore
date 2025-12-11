@@ -4,3 +4,15 @@ node_modules/
 .DS_Store
 
 /generated/prisma
+
+# Local databases
+dev.db
+prisma/dev.db
+*.db-journal
+
+# Generated video outputs
+videos/
+*.mp4
+*.mov
+*.mkv
+*.webm

@@ -3,8 +3,8 @@ const cors = require('cors');
 const fetch = require('node-fetch');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
-const { PrismaClient } = require('@prisma/client');
 require('dotenv').config();
+const { PrismaClient } = require('@prisma/client');
 
 const app = express();
 const PORT = process.env.PORT || 3001; // Changed to 3001 to avoid conflict with Nexus
@@ -13,7 +13,7 @@ const KLING_SECRET_KEY = process.env.KLING_SECRET_KEY;
 const KLING_API_BASE = 'https://api-beijing.klingai.com';
 const NEXUS_AUTH_URL = process.env.NEXUS_AUTH_URL || 'http://localhost:3000';
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({});
 
 // Cookie configuration
 const COOKIE_OPTIONS = {
@@ -127,7 +127,7 @@ app.post('/api/teacher/login', async (req, res) => {
 
         if (!teacher) {
             teacher = await prisma.teacher.create({
-                data: { username: externalUsername, passwordHash: '' }
+                data: { username: externalUsername }
             });
         }
 

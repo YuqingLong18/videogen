@@ -49,9 +49,21 @@ const elements = {
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+    hideUnavailableModels();
     checkSession();
     setupEventListeners();
 });
+
+// Temporarily hide models we don't want exposed yet
+function hideUnavailableModels() {
+    const hiddenModels = ['kling-v2-1'];
+    hiddenModels.forEach(value => {
+        document.querySelectorAll(`option[value="${value}"]`).forEach(option => {
+            option.disabled = true;
+            option.hidden = true;
+        });
+    });
+}
 
 // Check Session
 async function checkSession() {

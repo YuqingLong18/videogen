@@ -14,6 +14,7 @@ const KLING_API_BASE = 'https://api-beijing.klingai.com';
 const NEXUS_AUTH_URL = process.env.NEXUS_AUTH_URL || 'http://localhost:3000';
 
 const prisma = new PrismaClient({});
+const MAX_GENERATIONS_PER_STUDENT = 5;
 
 // Cookie configuration
 const COOKIE_OPTIONS = {
@@ -258,6 +259,13 @@ app.post('/api/text2video', async (req, res) => {
     }
 
     try {
+        const submissionCount = await prisma.videoSubmission.count({
+            where: { studentId: req.user.id }
+        });
+        if (submissionCount >= MAX_GENERATIONS_PER_STUDENT) {
+            return res.status(429).json({ error: 'Generation limit reached. You have used all 5 submissions.' });
+        }
+
         if (!KLING_ACCESS_KEY || !KLING_SECRET_KEY) {
             return res.status(500).json({ error: 'API keys not configured' });
         }
@@ -305,6 +313,13 @@ app.post('/api/image2video', async (req, res) => {
     }
 
     try {
+        const submissionCount = await prisma.videoSubmission.count({
+            where: { studentId: req.user.id }
+        });
+        if (submissionCount >= MAX_GENERATIONS_PER_STUDENT) {
+            return res.status(429).json({ error: 'Generation limit reached. You have used all 5 submissions.' });
+        }
+
         if (!KLING_ACCESS_KEY || !KLING_SECRET_KEY) {
             return res.status(500).json({ error: 'API keys not configured' });
         }

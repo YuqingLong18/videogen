@@ -1,5 +1,6 @@
 // Configuration
-const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:${window.location.port || 3001}/api`;
+// Use same-origin API base so it works behind reverse proxies (no hardcoded port)
+const API_BASE_URL = `${window.location.origin}/api`;
 const POLL_INTERVAL = 3000; // Poll every 3 seconds
 const MAX_POLL_ATTEMPTS = 400; // Max 20 minutes (400 * 3s) - Kling can take a while!
 
